@@ -1,0 +1,98 @@
+---
+title: "EDS223 Homework 1"
+subtitle: "Environmental (in)justice maps"
+author: "Eden Gonzalez"
+date: 2025-10-1
+execute: 
+  eval: true
+format:
+  html:
+    toc: true
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r}
+library(tidyverse)
+library(sf)
+library(here)
+library(tmap)
+library(viridisLite)
+```
+
+```{r}
+# read in geodatabase of EJScreen data at the Census Block Group level
+ejscreen <- sf::st_read(here::here("data", "ejscreen","EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb")) 
+```
+
+```{r}
+# Filter to New Mexico
+new_mexico <- ejscreen |> 
+  filter(ST_ABBREV == "NM") 
+```
+
+```{r}
+# Find the average values for all variables within New Mexico counties
+new_mexico_counties <- aggregate(new_mexico, by = list(new_mexico$CNTY_NAME), FUN = mean)
+```
+
+
+```{r}
+# Mapping the mean percentile of people of color in New Mexico counties
+people_of_color <- tm_shape(new_mexico_counties) +
+  tm_graticules(col = "lightgray") +         
+  tm_polygons(lwd = 0.5, 
+              fill = "P_PEOPCOLORPCT", 
+              fill.scale = tm_scale(values = c("lightcyan1", "darkslateblue") ),
+              fill.legend = tm_legend(title = "Mean Percentile of\nPeople of Color",
+              position = tm_pos_out("right"), 
+              frame = FALSE,
+              title.size = 0.7)
+             )  +
+  tm_scalebar() +
+  tm_compass(position = c("right", "top")) +
+  tm_credits("Source: EPA") +
+  tm_title("Mean Percentile of People of Color in New Mexico Counties") +
+  tm_layout(frame.lwd = 0.4)
+```
+
+
+```{r}
+air_releases <- tm_shape(new_mexico_counties) +
+  tm_graticules(col = "lightgray") +
+  tm_polygons(lwd = 0.5, 
+              fill = "P_RSEI_AIR",
+              fill.scale = tm_scale(values = c("lightcyan1", "darkslateblue")),
+              fill.legend = tm_legend(title = "Mean Percentile of\nToxic Releases to Air", position = tm_pos_out("right"), 
+              frame = FALSE,
+              title.size = 0.7), 
+              ) +
+  tm_scalebar() +
+  tm_compass(position = c("right", "top")) +
+  tm_credits("Source: EPA") +
+  tm_title("Mean Percentile of Toxic Releases to Air in New Mexico Counties") +
+  tm_layout(frame.lwd = 0.4)
+  
+
+```
+
+
+```{r}
+air_releases
+```
+
+The data frame `ej_screen` was first filtered to keep data from New Mexico into a `new_mexico` dataframe. This new data frame was then aggregated by county to get the mean values of all variables. `new_mexico_counties` is a data frame where each row is a county, and the corresponding values are the mean values for each variable. 
+
+
+
+`map1` maps the mean percentile of people of color in New Mexico counties. 
+
+The map1 
+
+- TGenerally 
+
+
+```{r}
+people_of_color 
+```
