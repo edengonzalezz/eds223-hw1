@@ -3,7 +3,7 @@
 
 
 
-![Source: [Oil & Gas Threat Map](https://oilandgasthreatmap.com/public-lands/new-mexico/)](https://oilandgasthreatmap.com/wp-content/uploads/2016/04/newmexico-publiclands-500x500.png){width=300px}
+![Source: [Oil & Gas Threat Map](https://oilandgasthreatmap.com/public-lands/new-mexico/)](https://oilandgasthreatmap.com/wp-content/uploads/2016/04/newmexico-publiclands-500x500.png)
 
 
 ### Why New Mexico?
