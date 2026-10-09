@@ -5,15 +5,17 @@ author: "Eden Gonzalez"
 date: 2025-10-1
 execute: 
   eval: true
-format:
-  html:
-    toc: true
+format: pdf
+mainfont: Helvetica
 editor_options: 
   chunk_output_type: console
 ---
 
+### Load libraries
 
 ```{r}
+#| warning: false
+#| message: false
 library(tidyverse)
 library(sf)
 library(here)
@@ -21,78 +23,90 @@ library(tmap)
 library(viridisLite)
 ```
 
+### Load, filter, aggregate
 ```{r}
+#| warning: false
+#| message: false
+
 # read in geodatabase of EJScreen data at the Census Block Group level
 ejscreen <- sf::st_read(here::here("data", "ejscreen","EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb")) 
-```
 
-```{r}
 # Filter to New Mexico
-new_mexico <- ejscreen |> 
-  filter(ST_ABBREV == "NM") 
-```
+new_mexico <- ejscreen |> filter(ST_ABBREV == "NM")
 
-```{r}
 # Find the average values for all variables within New Mexico counties
-new_mexico_counties <- aggregate(new_mexico, by = list(new_mexico$CNTY_NAME), FUN = mean)
+new_mexico_counties <- aggregate(new_mexico, by = list(new_mexico$CNTY_NAME), FUN = mean, na.rm = TRUE)
 ```
 
 
+
+### Create Map of the Mean Percentile of People of Color in NM Counties
 ```{r}
 # Mapping the mean percentile of people of color in New Mexico counties
 people_of_color <- tm_shape(new_mexico_counties) +
   tm_graticules(col = "lightgray") +         
   tm_polygons(lwd = 0.5, 
-              fill = "P_PEOPCOLORPCT", 
-              fill.scale = tm_scale(values = c("lightcyan1", "darkslateblue") ),
-              fill.legend = tm_legend(title = "Mean Percentile of\nPeople of Color",
-              position = tm_pos_out("right"), 
-              frame = FALSE,
-              title.size = 0.7)
-             )  +
+            fill = "P_PEOPCOLORPCT", 
+            fill.scale = tm_scale(values = c("lightcyan1", "darkslateblue")),
+            fill.legend = tm_legend(title = "Mean Percentile of\nPeople of Color",
+            position = tm_pos_out("right"), 
+            frame = FALSE,
+            title.size = 0.7))  +
   tm_scalebar() +
   tm_compass(position = c("right", "top")) +
-  tm_credits("Source: EPA") +
+  tm_credits("Source: EJScreen") +
   tm_title("Mean Percentile of People of Color in New Mexico Counties") +
   tm_layout(frame.lwd = 0.4)
 ```
 
+### Create Map of the Mean Percentile of People of Color in NM Counties
 
 ```{r}
-air_releases <- tm_shape(new_mexico_counties) +
+pm25 <- tm_shape(new_mexico_counties) +
   tm_graticules(col = "lightgray") +
   tm_polygons(lwd = 0.5, 
-              fill = "P_RSEI_AIR",
+              fill = "P_PM25",
               fill.scale = tm_scale(values = c("lightcyan1", "darkslateblue")),
-              fill.legend = tm_legend(title = "Mean Percentile of\nToxic Releases to Air", position = tm_pos_out("right"), 
+              fill.legend = tm_legend(title = "Mean Percentile of\nPM2.5", position = tm_pos_out("right"), 
               frame = FALSE,
               title.size = 0.7), 
               ) +
   tm_scalebar() +
   tm_compass(position = c("right", "top")) +
-  tm_credits("Source: EPA") +
-  tm_title("Mean Percentile of Toxic Releases to Air in New Mexico Counties") +
+  tm_credits("Source: EJScreen") +
+  tm_title("Mean Percentile of PM2.5 in New Mexico Counties") +
   tm_layout(frame.lwd = 0.4)
   
 
 ```
 
-
-```{r}
-air_releases
-```
-
-The data frame `ej_screen` was first filtered to keep data from New Mexico into a `new_mexico` dataframe. This new data frame was then aggregated by county to get the mean values of all variables. `new_mexico_counties` is a data frame where each row is a county, and the corresponding values are the mean values for each variable. 
-
-
-
-`map1` maps the mean percentile of people of color in New Mexico counties. 
-
-The map1 
-
-- TGenerally 
-
+### Display Maps
 
 ```{r}
 people_of_color 
 ```
+
+The map displays the distribution of the mean percentile of people of color in each New Mexico county. Notably, New Mexico has a large population of Native Americans and Hispanic/Latinos. The map indicates a higher mean percentile of people of color in the northwest. This aligns with the location of Native American reservations. Southern New Mexico also has greater mean percentile of people of color. This aligns with its proximity to the Mexican border. 
+
+
+```{r}
+pm25
+```
+
+ The mean percentile particulate matter 2.5 (PM2.5) was chosen as it is among the most damaging pollutants to human health, and a dominant pollutant associated with crude oil and natural gas extration in New Mexico ([Goodkind et al. 2023](https://econ.unm.edu/common/documents/2023nm-research_goodkind-etal-v2.pdf)). The map shows that the mean percentile of PM2.5 reaches values of 80-100 in the southwest counties. This is reasonable as the counties --Eddy and Lea-- are located in the Permian Basin, the United States' largest oil-producing basin. Some northwestern counties of New Mexico --San Juan and Sandoval-- also experience elevated levels of PM2.5. This is also reasonable as those counties are located in the San Juan Basin, another prolific oil and natural gas extraction site for the United States ([New Mexico Bureau of Geology and Mineral Resources](https://geoinfo.nmt.edu/resources/water/projects/bwa/sjb/home.html#)).
+
+
+
+## Environmental Justice
+
+In tandem, these maps show how communities of color and PM2.5 exposure overlap in New Mexico. In the southeastern counties of Lea and Eddy, the mean percentile for people of color is 40-59 and the mean percentile for PM2.5 is 80-100. In the northwestern county of San Juan, the percentile  for people of color is also 40-59 and mean percentile for PM2.5 is 20-39. Both counties have similar demographics but different exposure to PM2.5. This could suggest that exposure may be mainly influenced by geography. However, it is crucial to consider that geography itself does not operate independently from race as historical segregation and lack of affordable housing may concentrate communities of color in more polluted areas.
+
+
+
+
+### References
+
+Goodkind, Andrew L., et al. PM2.5 Pollution from Oil and Gas Activity in the Permian Basin: An Economic Analysis of Its Human Health Impacts and Damages.
+
+San Juan Basin. [https://geoinfo.nmt.edu/resources/water/projects/bwa/sjb/home.html#](https://geoinfo.nmt.edu/resources/water/projects/bwa/sjb/home.html#). Accessed 7 Oct. 2026.
+
